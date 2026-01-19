@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced AI Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='calculator_advanced.css') }}" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="calculator-panel">
+        <div class="header">
+          <div class="title-section">
+            <h1>
+              <span class="icon">🧮</span>
+              Advanced AI Calculator
+            </h1>
+            <p>Intelligent math solving with multiple modes</p>
+          </div>
+          <div class="mode-selector">
+            <label for="calc-mode">Mode:</label>
+            <select id="calc-mode">
+              <option value="standard">Standard</option>
+              <option value="detailed">Detailed</option>
+              <option value="step-by-step">Step-by-Step</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-section">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="question-input"
+              placeholder="Enter your math problem... (e.g., 2^3 + √144 × 5)"
+              autocomplete="off"
+            />
+            <button id="calculate-btn" class="primary-btn">
+              <span class="btn-icon">⚡</span>
+              Calculate
+            </button>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-btn" data-action="clear">Clear</button>
+            <button class="quick-btn" data-action="examples">Examples</button>
+            <button class="quick-btn" data-action="history">History</button>
+          </div>
+        </div>
+
+        <div class="result-section" id="result-section">
+          <div class="result-header">
+            <span class="result-label">Result</span>
+            <button class="copy-btn" id="copy-btn" title="Copy result">
+              📋
+            </button>
+          </div>
+          <div id="result-display" class="result-display">
+            <div class="placeholder">Your answer will appear here...</div>
+          </div>
+          <div id="status-message" class="status-message"></div>
+        </div>
+      </div>
+
+      <div class="history-panel" id="history-panel">
+        <div class="history-header">
+          <h2>📚 Calculation History</h2>
+          <div class="history-actions">
+            <button class="icon-btn" id="refresh-history" title="Refresh">🔄</button>
+            <button class="icon-btn" id="clear-history" title="Clear all">🗑️</button>
+          </div>
+        </div>
+        <div id="history-list" class="history-list">
+          <div class="history-empty">No calculations yet. Start solving!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="examples-modal" id="examples-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Example Problems</h3>
+          <button class="close-btn" id="close-examples">×</button>
+        </div>
+        <div class="examples-list">
+          <div class="example-item" data-example="2^3 + √144 × 5">
+            <strong>Basic:</strong> 2^3 + √144 × 5
+          </div>
+          <div class="example-item" data-example="(15 + 25) × 2 ÷ 8">
+            <strong>Order of Operations:</strong> (15 + 25) × 2 ÷ 8
+          </div>
+          <div class="example-item" data-example="log(100) + ln(e^2)">
+            <strong>Logarithms:</strong> log(100) + ln(e^2)
+          </div>
+          <div class="example-item" data-example="sin(30°) + cos(60°)">
+            <strong>Trigonometry:</strong> sin(30°) + cos(60°)
+          </div>
+          <div class="example-item" data-example="∫(x^2 + 2x + 1)dx from 0 to 5">
+            <strong>Calculus:</strong> ∫(x^2 + 2x + 1)dx from 0 to 5
+          </div>
+          <div class="example-item" data-example="What is 25% of 480?">
+            <strong>Percentage:</strong> What is 25% of 480?
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const questionInput = document.getElementById("question-input");
+      const calculateBtn = document.getElementById("calculate-btn");
+      const resultDisplay = document.getElementById("result-display");
+      const statusMessage = document.getElementById("status-message");
+      const calcMode = document.getElementById("calc-mode");
+      const copyBtn = document.getElementById("copy-btn");
+      const historyPanel = document.getElementById("history-panel");
+      const historyList = document.getElementById("history-list");
+      const refreshHistory = document.getElementById("refresh-history");
+      const clearHistoryBtn = document.getElementById("clear-history");
+      const examplesModal = document.getElementById("examples-modal");
+      const closeExamples = document.getElementById("close-examples");
+
+      // Quick actions
+      document.querySelectorAll(".quick-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const action = btn.dataset.action;
+          if (action === "clear") clearAll();
+          else if (action === "examples") showExamples();
+          else if (action === "history") toggleHistory();
+        });
+      });
+
+      // Example modal
+      document.querySelectorAll(".example-item").forEach(item => {
+        item.addEventListener("click", () => {
+          questionInput.value = item.dataset.example;
+          examplesModal.style.display = "none";
+          questionInput.focus();
+        });
+      });
+
+      closeExamples.addEventListener("click", () => {
+        examplesModal.style.display = "none";
+      });
+
+      examplesModal.addEventListener("click", (e) => {
+        if (e.target === examplesModal) examplesModal.style.display = "none";
+      });
+
+      function showExamples() {
+        examplesModal.style.display = "flex";
+      }
+
+      function toggleHistory() {
+        historyPanel.classList.toggle("expanded");
+      }
+
+      // Copy result
+      copyBtn.addEventListener("click", async () => {
+        const resultText = resultDisplay.textContent.trim();
+        if (resultText && !resultText.includes("Your answer")) {
+          try {
+            await navigator.clipboard.writeText(resultText);
+            copyBtn.textContent = "✓";
+            setTimeout(() => {
+              copyBtn.textContent = "📋";
+            }, 2000);
+          } catch (err) {
+            alert("Failed to copy");
+          }
+        }
+      });
+
+      // Calculate
+      calculateBtn.addEventListener("click", calculate);
+      questionInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") calculate();
+      });
+
+      async function calculate() {
+        const question = questionInput.value.trim();
+        if (!question) {
+          showStatus("Please enter a math problem", "error");
+          return;
+        }
+
+        calculateBtn.disabled = true;
+        calculateBtn.innerHTML = '<span class="btn-icon">⏳</span> Calculating...';
+        resultDisplay.innerHTML = '<div class="loading">Computing...</div>';
+        statusMessage.textContent = "";
+        statusMessage.className = "status-message";
+
+        try {
+          const response = await fetch("/api/calc", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              question: question,
+              mode: calcMode.value
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Calculation failed");
+          }
+
+          const answer = data.answer || "No answer returned";
+          resultDisplay.innerHTML = `<div class="answer">${formatAnswer(answer)}</div>`;
+          showStatus("✓ Calculation complete", "success");
+          loadHistory();
+        } catch (error) {
+          resultDisplay.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+          showStatus("✗ Calculation failed", "error");
+        } finally {
+          calculateBtn.disabled = false;
+          calculateBtn.innerHTML = '<span class="btn-icon">⚡</span> Calculate';
+        }
+      }
+
+      function formatAnswer(answer) {
+        // Format the answer with line breaks for step-by-step
+        return answer.split("\n").map(line => {
+          if (line.trim() === "") return "<br>";
+          if (line.match(/^\d+\./)) {
+            return `<div class="step">${line}</div>`;
+          }
+          return `<div>${line}</div>`;
+        }).join("");
+      }
+
+      function showStatus(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = `status-message ${type}`;
+        setTimeout(() => {
+          statusMessage.textContent = "";
+          statusMessage.className = "status-message";
+        }, 3000);
+      }
+
+      function clearAll() {
+        questionInput.value = "";
+        resultDisplay.innerHTML = '<div class="placeholder">Your answer will appear here...</div>';
+        statusMessage.textContent = "";
+        statusMessage.className = "status-message";
+        questionInput.focus();
+      }
+
+      // History functions
+      refreshHistory.addEventListener("click", loadHistory);
+      clearHistoryBtn.addEventListener("click", async () => {
+        if (confirm("Clear all calculation history?")) {
+          try {
+            await fetch("/api/history", { method: "DELETE" });
+            loadHistory();
+          } catch (error) {
+            alert("Failed to clear history");
+          }
+        }
+      });
+
+      async function loadHistory() {
+        try {
+          const response = await fetch("/api/history?limit=20");
+          const data = await response.json();
+          
+          if (data.history.length === 0) {
+            historyList.innerHTML = '<div class="history-empty">No calculations yet. Start solving!</div>';
+            return;
+          }
+
+          historyList.innerHTML = data.history.map(item => `
+            <div class="history-item">
+              <div class="history-question">${item.question}</div>
+              <div class="history-answer">${item.answer.substring(0, 100)}${item.answer.length > 100 ? '...' : ''}</div>
+              <div class="history-meta">
+                <span class="history-mode">${item.mode}</span>
+                <span class="history-time">${item.timestamp}</span>
+                <button class="delete-item" data-id="${item.id}">🗑️</button>
+              </div>
+            </div>
+          `).join("");
+
+          // Add delete handlers
+          document.querySelectorAll(".delete-item").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const id = parseInt(btn.dataset.id);
+              try {
+                await fetch(`/api/history/${id}`, { method: "DELETE" });
+                loadHistory();
+              } catch (error) {
+                alert("Failed to delete item");
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Failed to load history:", error);
+        }
+      }
+
+      // Load history on page load
+      loadHistory();
+      
+      // Focus input on load
+      window.addEventListener("load", () => {
+        questionInput.focus();
+      });
+    </script>
+  </body>
+</html>
