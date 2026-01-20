@@ -76,7 +76,10 @@ http://127.0.0.1:5000
 * Teachers demonstrating problem-solving
 * Developers integrating AI calculators
 * Anyone needing explainable math solutions
+  
+📸 Screenshots
 
+* ![HomePage Image](https://github.com/harshitaverma11/Advanced_Smart_AI_Calculator/blob/6c17ae937aadc4941bb3b55c031b4e196fc30af2/Screenshot%202026-01-20%20180924.png)
 👩‍💻 Author
 
 **Harshita Verma**
