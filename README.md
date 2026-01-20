@@ -82,6 +82,8 @@ http://127.0.0.1:5000
  ![HomePage Image](https://github.com/harshitaverma11/Advanced_Smart_AI_Calculator/blob/6c17ae937aadc4941bb3b55c031b4e196fc30af2/Screenshot%202026-01-20%20180924.png)
 
  ![Modes Page](https://github.com/harshitaverma11/Advanced_Smart_AI_Calculator/blob/e9bf0d23e25358fdbcffd18713bfce5cb92bbff3/Screenshot%202026-01-20%20181136.png)
+
+ ![Exit Page with History](https://github.com/harshitaverma11/Advanced_Smart_AI_Calculator/blob/fdf56899871a01476dec9081abfd3c05f57600d9/Screenshot%202026-01-20%20181239.png)
 👩‍💻 Author
 
 **Harshita Verma**
